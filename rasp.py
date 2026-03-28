@@ -113,3 +113,37 @@ while True:
                 turnTime = None
                 enterTurnDegree = None
                 turningDegree = None
+
+    # --- Visualization --- #
+    drawRoi(frame, roi1, label="Left ROI")
+    drawRoi(frame,roi2, label="Right ROI")
+
+    #draw contours if found
+    if leftContour:
+        cv2.drawContours(frame, [leftContour], -1, (255, 0, 0), 2)
+    if rightContour:
+        cv2.drawContours(frame, [rightContour], -1, (255, 0, 0), 2)
+    
+    #numeric values for debugging
+    cv2.putText(frame, f"Left Area: {leftArea}", (roi1[0], roi1[1]-40),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(frame, f"Right Area: {rightArea}", (roi2[0], roi2[1]-40),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(frame, f": {}", (,),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(frame, f": {}", (,),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(frame, f": {}", (,),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(frame, f": {}", (,),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    
+    #display frame
+    cv2.imshow("Frame", frame)
+    cv2.imshow("LeftMask", leftMask)
+    cv2.imshow("RightMask", rightMask)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+cv2.destroyAllWindows()
+picam2.stop()
