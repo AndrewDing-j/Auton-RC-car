@@ -129,13 +129,13 @@ while True:
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.putText(frame, f"Right Area: {rightArea}", (roi2[0], roi2[1]-40),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(frame, f": {}", (,),
+    cv2.putText(frame, f"Confirm Count: {confirmCount}", (roi1[0], 90),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(frame, f": {}", (,),
+    cv2.putText(frame, f"Elapsed Turning Time: {now - (turnTime if turnTime else now):.2f}s", (roi1[0], roi1[3]+30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(frame, f": {}", (,),
+    cv2.putText(frame, f"Mode: {mode}", (roi1[0], 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(frame, f": {}", (,),
+    cv2.putText(frame, f"Side: {side}", (roi2[0], 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     
     #display frame
