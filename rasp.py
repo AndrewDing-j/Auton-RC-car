@@ -54,8 +54,10 @@ def wallAreaLab(frameRgb, roi, LabLower, LabUpper, minContour = 50):
         contourMax += [x1, y1] #shift contour points to full-frame coordinates
     return areaMax, contourMax, mask
 
-def pidController(error, prevError, kp=0.1, kd=0.05):
-    correction = kp * error + kd * (error - prevError)
+def pidController(error, prevError, kp=0.1, ki=0.01, kd=0.05):
+    global integral
+    integral += error
+    correction = kp * error + ki * integral + kd * (error - prevError)
     return correction
 
 # Define thresholds
@@ -75,8 +77,11 @@ turnTime = None
 # Turning variables
 enterTurnDegree = None
 turningDegree = None
+turnsCompleted = 0
 
+# PID variables
 prevError = 0
+integral = 0
 
 mode = "STRAIGHT" #STRAIGHT, TURNING
 
@@ -105,7 +110,6 @@ while True:
             mode = "TURNING"
             turnTime = now
             enterTurnDegree = int(ser.readline().decode().strip()) # Read current degree from Arduino's IMU
-            ser.write(f"$T{leftArea-rightArea}\n") # negative result indicates "turn left" and vice versa
     
     elif mode == "TURNING":
         delta = abs(enterTurnDegree - int(ser.readline().decode()).strip())
@@ -119,6 +123,9 @@ while True:
                 turnTime = None
                 enterTurnDegree = None
                 turningDegree = None
+                turnsCompleted += 1
+                continue
+        ser.write(f"$T{leftArea-rightArea}\n") # negative result indicates "turn left" and vice versa
 
     # --- Visualization --- #
     drawRoi(frame, roi1, label="Left ROI")

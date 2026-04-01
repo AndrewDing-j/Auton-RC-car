@@ -41,6 +41,12 @@ static void calibrateGyro(float&biasX, float&biasY, float&biasZ) {
     biasZ /= samples;
 }
 
+static void straightDrive(float correction, int speed = 1800) {
+    motor.writeMicroseconds(speed); // Adjust this value for forward speed
+    int pwm = map(correction, -6000, 6000, 900, 2100); // Limit correction to valid servo angles
+    servo.writeMicroseconds(pwm);
+}
+
 static void processCommand(char* cmd) {
     if (!cmd || cmd[0] == '\0') return;
 
@@ -58,10 +64,12 @@ static void processCommand(char* cmd) {
 
     switch (type) {
         case 'S':
-            if (val < 0 || val > 180) return; // Invalid angle
-            servo.write(val);
+            if (val < -6000 || val > 6000) return; // Invalid value
+            straightDrive(val);
             break;
         case 'T': {
+            val < 0 ? servo.writeMicroseconds(900) : servo.writeMicroseconds(2100);
+            motor.writeMicroseconds(1600); // Slow down for turning
             float gx, gy, gz;
             if (IMU.gyroscopeAvailable()) {
                 IMU.readyGyroscope(gx, gy, gz);
@@ -90,6 +98,7 @@ void setup() {
     
     // ESC arming sequence
     motor.writeMicroseconds(1500); // set to neutral
+    servo.writeMicroseconds(1500); // set to straight
     delay(3000);
     Serial.println("ESC armed. Ready to receive commands.");
 
