@@ -54,6 +54,10 @@ def wallAreaLab(frameRgb, roi, LabLower, LabUpper, minContour = 50):
         contourMax += [x1, y1] #shift contour points to full-frame coordinates
     return areaMax, contourMax, mask
 
+def pidController(error, prevError, kp=0.1, kd=0.05):
+    correction = kp * error + kd * (error - prevError)
+    return correction
+
 # Define thresholds
 LAB_LOWER = np.array([20,120,120], dtype=np.uint8) #adjust LAB_LOWER and LAB_UPPER based on the wall colour
 LAB_UPPER = np.array([70,255,255], dtype=np.uint8)
@@ -86,6 +90,7 @@ while True:
 
     # --- State Machine --- #
     if mode == "STRAIGHT":
+        ser.write(f"$S{pidController(leftArea-rightArea, prevError)}\n")
         if leftArea < ENTER_TURN_THRESH or rightArea < ENTER_TURN_THRESH:
             confirmCount += 1
         else:
@@ -100,9 +105,10 @@ while True:
             mode = "TURNING"
             turnTime = now
             enterTurnDegree = int(ser.readline().decode().strip()) # Read current degree from Arduino's IMU
+            ser.write(f"$T{leftArea-rightArea}\n") # negative result indicates "turn left" and vice versa
     
     elif mode == "TURNING":
-        delta = abs(enterTurnDegree - int(ser.readline().decode().strip()))
+        delta = abs(enterTurnDegree - int(ser.readline().decode()).strip())
         turningDegree = min(delta, 360 - delta) # handling of wrapping from 0 to 360 degrees
         elapsed = now - (turnTime if turnTime else now)
         if elasped > EXIT_TIME_THRESH and turningDegree > EXIT_ANGLE_THRESH:
