@@ -76,8 +76,8 @@ static void processCommand(char* cmd) {
                 Serial.println(gy - biasY);
             }
             delay(10);
+            break;
         }
-        break;
         default:
             // Ignore unkown command type
             break;
