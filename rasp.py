@@ -55,9 +55,10 @@ def wallAreaLab(frameRgb, roi, LabLower, LabUpper, minContour = 50):
     return areaMax, contourMax, mask
 
 def pidController(error, prevError, kp=0.1, ki=0.01, kd=0.05):
-    global integral
+    global integral, prevError
     integral += error
     correction = kp * error + ki * integral + kd * (error - prevError)
+    prevError = error
     return correction
 
 # Define thresholds
@@ -95,7 +96,7 @@ while True:
 
     # --- State Machine --- #
     if mode == "STRAIGHT":
-        ser.write(f"$S{pidController(leftArea-rightArea, prevError)}\n")
+        ser.write(f"$S{pidController(leftArea-rightArea)}\n")
         if leftArea < ENTER_TURN_THRESH or rightArea < ENTER_TURN_THRESH:
             confirmCount += 1
         else:
