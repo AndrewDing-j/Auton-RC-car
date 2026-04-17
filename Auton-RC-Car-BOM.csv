@@ -1,0 +1,16 @@
+Item,Quantity,Description
+WL Toys K989 1:28 Scale Rally Car (RTR),1,Contains aluminum 1:28 sclae RC car chassis. Wheels attached.
+8MP Camera for Raspberry Pi 5 IMX219 130° FOV CSI Interface with 15 cm FFC for RPI 5 Zero/ZeroW/2W,1,130 Degree wide camera with 8MP/4K resolution. Captures visual information so the Raspberry Pi 5 can send appropriate commands to the Arduino module.
+"Yahboom Power supply Expansion Board for Raspberry Pi 5 (5V/5A, ideally USB PD power supply)",1,Provides a regulated 5.0V source of power to the Raspberry Pi 5.
+LiPo battery,1,Rechargeable Gens Ace 2 cell 1300mAh 7.4v battery with a female dean connector. Serves as the main power source.
+Button (to start the robot),1,Button to power the RC Car on and off.
+Arduino Nano 33 BLE Sense Rev2,1,Arduino Nano module with an on board IMU. Requires 3.3v power supply. Will control the peripheries which move the RC Car
+Hitec HS-5055MG Servo Motor,1,11.9g metal gear digital microservo. Steers the car and controlled by the Arduino module through the Lizard Pro Esc.
+Furitek Lizard Pro 30A/50A Brushed/Brushless Esc For Axial SCX24 With FOC Technology,1,Esc with controls for BLDC motor and servo. Can recieve and redistribute power.
+BLDC Motor,1,17.5g BLDC micro motor with an rpm of 3450/KV. Will provide speed for the motor and controlled through the Esc.
+Main Platform,1,"3DP platform with holes for the Arduino, Raspberry Pi, and other 3DP components."
+Battery Mount,1,3DP Platform to maintain the LiPo battery in a central area.
+Camera Mount,1,3DP frame structure with holes drilled at the top to screw on the 8MP Camera. Attaches to the Raspberry Pi 5 with pegs.
+Motor Holder/Gearbox,1,3DP gerabox that keeps the BLDC motor stable and in place.
+Wheel Clamp,2,3DP piece that keeps suspensions springs and bottom of wheels from going above the chassis.
+Steering Rod,1,3DP steering rod attached to the wheels and servo.
