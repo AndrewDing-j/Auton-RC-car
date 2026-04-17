@@ -1,6 +1,9 @@
 # Auton-RC-car
 ## An autonomous car powered by Raspberry Pi 5 and Arduino Nano 33 BLE Sense which can navigate through roads of various width that are flanked by walls.
 
+### Why this project?
+I have always been interested in computer vision and found that this was a great excuse to make a project centred on that. Automation facinates me and I am very aware of how the world is rapidly moving towards self-driving vehicles through autonomous taxi services. I wanted to try my own hand in building something similar while also building the skills that could help me contribute to a better, more sustainable future.
+
 ### Software:
 The Raspberry Pi is responsible for processing environmental data, while the Arduino serves as the controller for most peripherals, excluding the camera, and handles IMU information.
 Uses a simple command protocol which allows the Arduino and Raspberry Pi to communicate with one another and interpret several commands.
@@ -39,3 +42,6 @@ The chassis is that of a WL Toys K989 1:28 Scale Rally Car. All components - exc
 - - Returns IMU gyroscopic data
 - - Runs callibration script to counteract the IMU's gyroscopic drift
 - - Handles commands
+
+<img width="460" height="706" alt="image" src="https://github.com/user-attachments/assets/3f031768-cc40-42b7-a58d-8ac2dd8a0d0a" />
+
