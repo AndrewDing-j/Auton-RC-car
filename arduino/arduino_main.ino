@@ -27,8 +27,6 @@ Servo motor;
 #define SERVO_PIN 8
 #define MOTOR_PIN 9
 
-#define DECLINATION_DEG  -10.1f
-
 // This need to be calibrated board to board. Please uncomment calibrateMag() under void loop to do so.
 #define MAG_X_OFFSET  39.0f
 #define MAG_Y_OFFSET  30.0f
@@ -37,6 +35,8 @@ Servo motor;
 // Kp = how fast it corrects, Ki = slowly kills gyro bias
 #define Kp  2.0f
 #define Ki  0.05f
+
+static float heading = 0.0f;
 
 void calibrateGyro() {
   Serial.println("Keep still — calibrating gyro...");
@@ -181,7 +181,14 @@ void warmupAndZero() {
   Serial.println("Zeroed. Go!");
 }
 
-static void processCommand(char* cmd) {
+void startupCalibration() {
+  calibrateGyro();
+  warmupAndZero();
+  lastTime = micros();
+  heading = 0.0f;
+}
+
+static void processCommand(char* cmd, float heading=heading) {
   if (!cmd || cmd[0] == '\0') return;
 
   char* cr = strchr(cmd, '\r');
@@ -196,51 +203,31 @@ static void processCommand(char* cmd) {
   char* endp = nullptr;
   long val = strtol(cmd, &endp, 10);
 
-  if (type == 'S') {                            // Set servo position
+  if (type == 'C') {  // (re-)calibrate gyro and zero heading
+      startupCalibration();
+  } else if (type == 'S') {                            // Set servo position
       if (val < 25 || val > 130) return;  // Invalid angle
-      Serial.println(val);
-      //servo.write(val);
+      //Serial.println(val);
+      servo.write(val);
   } else if (type == 'M') {  // return IMU data and turn
     if (val < 1000 || val > 2000) return;  // Invalid speed
     motor.writeMicroseconds(val);
     //Serial.println(val);
   } else if (type == 'L') {
     if (val < 22 || val > 24) return;  // Invalid LED
-    digitalWrite(LEDR, LOW);
-    digitalWrite(LEDG, LOW);
-    digitalWrite(LEDB, LOW);
+    digitalWrite(22, LOW);
+    digitalWrite(23, LOW);
+    digitalWrite(24, LOW);
     digitalWrite(val, HIGH);
-  } /*else if (type == 'I') {
-    unsigned long now = micros();
-    float dt = (now-lastTime)*1e-6f;
-    if (dt < 0.002f) return;
-    lastTime = now;
-    if (dt > 0.05f) dt = 0.05f;
-
-    readAndFuse(dt);
-
-    // rotate by reference quaternion so output is relative to startup pose
-    float rq0 = r0*q0 - r1*q1 - r2*q2 - r3*q3;
-    float rq1 = r0*q1 + r1*q0 + r2*q3 - r3*q2;
-    float rq2 = r0*q2 - r1*q3 + r2*q0 + r3*q1;
-    float rq3 = r0*q3 + r1*q2 - r2*q1 + r3*q0;
-
-    float roll    = atan2f(2*(rq0*rq1+rq2*rq3), 1-2*(rq1*rq1+rq2*rq2)) * RAD_TO_DEG;
-    float pitch   = asinf (constrain(2*(rq0*rq2-rq3*rq1), -1.0f, 1.0f)) * RAD_TO_DEG;
-    float heading = atan2f(2*(rq0*rq3+rq1*rq2), 1-2*(rq2*rq2+rq3*rq3)) * RAD_TO_DEG;
-
-    // Y axis = forward
-    heading += DECLINATION_DEG - 90.0f;
-    if (heading < 0)   heading += 360.0f;
-    if (heading > 360) heading -= 360.0f;
-    Serial.println(heading + 90.0f, 4);
-  } */
+  } else if (type == 'I') {
+    Serial.println(heading);
+  }
 }
 
 void setup() {
-  pinMode(LEDR, OUTPUT);
-  pinMode(LEDG, OUTPUT);
-  pinMode(LEDB, OUTPUT);
+  pinMode(22, OUTPUT); // blue
+  pinMode(23, OUTPUT); // red
+  pinMode(24, OUTPUT); // green
 
   servo.attach(SERVO_PIN, 900, 2100);
   motor.attach(MOTOR_PIN, 1000, 2000);
@@ -251,38 +238,32 @@ void setup() {
   while (!Serial);
 
   if (!IMU.begin()) {
-    //Serial.println("Failed to initialize IMU!");
+    Serial.println("Failed to initialize IMU!");
     while (1);
   }
-  //Serial.println("IMU initialized successfully.");
+  Serial.println("IMU initialized successfully.");
 
   // uncomment once to get mag offsets, paste above, then comment out again
   //calibrateMag();
 
-  calibrateGyro();
-  warmupAndZero();
-  lastTime = micros();
+  startupCalibration();
 }
 
 void loop() {
   // CMD Processing
-  while (Serial.available() > 0) {
+  if (Serial.available() > 0) {
     char c = (char)Serial.read();
     if (c == SOC) {
       inCommand = true;
       lineLen = 0;
-      continue;
     }
-    if (inCommand) {
+    else if (inCommand) {
       if (c == '\n') {
         lineBuf[lineLen] = '\0';  // Null-terminate command
-        processCommand(lineBuf);
+        processCommand(lineBuf, heading);
         inCommand = false;
         lineLen = 0;
-        continue;
-      }
-
-      if (lineLen < MAX_LINE) {
+      } else if (lineLen < MAX_LINE) {
         lineBuf[lineLen++] = c;  // Append char to command buffer
       } else {
         // Command too long
@@ -290,5 +271,20 @@ void loop() {
         lineLen = 0;
       }
     }
+  }
+
+  //IMU Background Processing
+  if (IMU.gyroscopeAvailable()) {
+    float x, y, z;
+    IMU.readGyroscope(x, y, z);
+    z -= gbz;
+
+    if (abs(z) < 0.1) z = 0.0;  // ignores insignificant gyro readings/noise
+      
+    unsigned long now = micros();
+    float dt = (now-lastTime)*1e-6f;  // calc dt (elapsed time)
+    lastTime = now;
+
+    heading -= dt * z;  // integrate gyro's angular velocity to get heading
   }
 }
